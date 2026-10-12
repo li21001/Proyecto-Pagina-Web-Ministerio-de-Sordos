@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Panel de administración · Ministerio de Sordos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/panel.css">
+  <script src="../js/contenido.js"></script>
+  <script type="module" src="../js/panel.js"></script>
+</head>
+<body class="panel verificando">
+  <p class="panel__verificando" role="status">Verificando el acceso…</p>
+
+  <div class="panel__marco">
+  <aside class="panel__lateral">
+    <div class="panel__marca">
+      <img src="../img/logo.svg" alt="" width="46" height="46">
+      <div>
+        <p class="panel__titulo">Panel del ministerio</p>
+        <p class="panel__subtitulo">Ministerio de Sordos</p>
+      </div>
+    </div>
+
+    <div class="panel__sesion" aria-label="Sesión activa">
+      <span class="panel__avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+      <div>
+        <p class="panel__sesion-estado"><span class="panel__punto" aria-hidden="true"></span>Sesión iniciada</p>
+        <p class="panel__sesion-nombre" id="usuario-nombre">Cuenta del ministerio</p>
+        <p class="panel__sesion-correo" id="usuario"></p>
+      </div>
+    </div>
+
+    <nav class="pestanas" role="tablist" aria-label="Secciones del panel" aria-orientation="vertical">
+        <button role="tab" type="button" id="tab-resumen" aria-controls="resumen" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Resumen</button>
+        <button role="tab" type="button" id="tab-textos" aria-controls="textos" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></svg>Textos</button>
+        <button role="tab" type="button" id="tab-horarios" aria-controls="horarios" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Horarios</button>
+        <button role="tab" type="button" id="tab-contacto" aria-controls="contacto" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Contacto y redes</button>
+        <button role="tab" type="button" id="tab-videos" aria-controls="videos" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>Videos</button>
+        <button role="tab" type="button" id="tab-galeria" aria-controls="galeria" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Galería</button>
+        <button role="tab" type="button" id="tab-publicaciones" aria-controls="publicaciones" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H5.2L4 17.5z"/><path d="M8 9h8M8 12h5"/></svg>Publicaciones</button>
+        <button role="tab" type="button" id="tab-biblioteca" aria-controls="biblioteca" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Biblioteca</button>
+        <button role="tab" type="button" id="tab-fechas" aria-controls="fechas" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Fechas especiales</button>
+        <button role="tab" type="button" id="tab-lideres" aria-controls="lideres" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.9"/></svg>Estructura</button>
+    </nav>
+
+    <div class="panel__salidas">
+      <a class="boton boton--borde" href="../index.html">Ver el sitio</a>
+      <button id="cerrar-sesion" type="button" class="boton boton--suave">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <main class="panel__cuerpo">
+    <div id="mensaje" class="mensaje" role="status" aria-live="polite" hidden></div>
+
+    <!-- Resumen -->
+    <section id="resumen" role="tabpanel" aria-labelledby="tab-resumen" class="panel__seccion">
+      <p class="panel__fecha" id="hoy"></p>
+      <h1>¡Hola, equipo del ministerio!</h1>
+      <p class="ayuda">Esto es lo que el sitio muestra ahora. Elige qué quieres actualizar.</p>
+      <div class="resumen__cifras">
+        <div class="cifra"><p class="cifra__nombre">Fotos en galería</p><p class="cifra__valor" id="cifra-galeria">–</p></div>
+        <div class="cifra"><p class="cifra__nombre">Publicaciones</p><p class="cifra__valor" id="cifra-publicaciones">–</p></div>
+        <div class="cifra"><p class="cifra__nombre">Materiales PDF</p><p class="cifra__valor" id="cifra-biblioteca">–</p></div>
+        <div class="cifra"><p class="cifra__nombre">Horarios</p><p class="cifra__valor" id="cifra-horarios">–</p></div>
+      </div>
+      <h2>Acciones rápidas</h2>
+      <div class="rapidas">
+        <button type="button" class="rapida rapida--principal" data-ir="galeria"><span class="rapida__icono"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span><strong>Subir una foto</strong><small>A la galería del sitio</small></span></button>
+        <button type="button" class="rapida" data-ir="publicaciones"><span class="rapida__icono"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H5.2L4 17.5z"/><path d="M8 9h8M8 12h5"/></svg></span><span><strong>Nueva publicación</strong><small>Enlace de Facebook, TikTok o YouTube</small></span></button>
+        <button type="button" class="rapida" data-ir="biblioteca"><span class="rapida__icono rapida__icono--dorado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg></span><span><strong>Agregar material</strong><small>PDF desde Google Drive</small></span></button>
+        <button type="button" class="rapida" data-ir="horarios"><span class="rapida__icono"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span><strong>Cambiar horarios</strong><small>Días y horas de reunión</small></span></button>
+      </div>
+      <h2>Últimas fotos</h2>
+      <ul class="resumen__fotos" id="resumen-fotos"></ul>
+    </section>
+
+    <!-- Textos institucionales (HU-20) -->
+    <section id="textos" role="tabpanel" aria-labelledby="tab-textos" class="panel__seccion" hidden>
+      <h1>Textos institucionales</h1>
+      <p class="ayuda">Aquí aparece el texto que el sitio muestra ahora. Escribe o corrige y presiona <strong>Guardar cambios</strong>. Deja una línea en blanco para separar párrafos.</p>
+      <form id="form-textos" class="textos">
+        <fieldset class="grupo">
+          <legend>Página de inicio</legend>
+          <div class="campo">
+            <label for="resena">Bienvenida (lo primero que se ve)</label>
+            <textarea id="resena" name="resena" rows="4"></textarea>
+          </div>
+        </fieldset>
+        <fieldset class="grupo">
+          <legend>Página Historia</legend>
+          <div class="grupo__dos">
+            <div class="campo">
+              <label for="mision">Misión</label>
+              <textarea id="mision" name="mision" rows="4"></textarea>
+            </div>
+            <div class="campo">
+              <label for="vision">Visión</label>
+              <textarea id="vision" name="vision" rows="4"></textarea>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="historia">Historia del ministerio</label>
+            <textarea id="historia" name="historia" rows="8"></textarea>
+          </div>
+        </fieldset>
+        <fieldset class="grupo">
+          <legend>Página Cultura Sorda</legend>
+          <div class="campo">
+            <label for="culturaSorda">Texto de introducción (opcional)</label>
+            <textarea id="culturaSorda" name="culturaSorda" rows="4" placeholder="Si lo dejas vacío, la página muestra solo las tarjetas."></textarea>
+          </div>
+        </fieldset>
+        <div class="guardar">
+          <p>Los cambios se ven en el sitio apenas guardas.</p>
+          <button type="submit" class="boton">Guardar cambios</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Horarios (HU-21) -->
+    <section id="horarios" role="tabpanel" aria-labelledby="tab-horarios" class="panel__seccion" hidden></section>
+
+    <!-- Contacto y redes (HU-21, HU-13, HU-14, HU-27) -->
+    <section id="contacto" role="tabpanel" aria-labelledby="tab-contacto" class="panel__seccion" hidden>
+      <h1>Contacto y redes sociales</h1>
+      <p class="ayuda">Dirección, correo, formulario de registro y redes del ministerio.</p>
+      <form id="form-contacto" class="textos">
+        <fieldset class="grupo">
+          <legend>Ubicación</legend>
+          <p class="grupo__nota">Se muestra en la página de inicio, en «Visítanos».</p>
+          <div class="grupo__dos">
+            <div class="campo">
+              <label for="direccion">Dirección</label>
+              <textarea id="direccion" name="direccion" rows="3"></textarea>
+            </div>
+            <div class="campo">
+              <label for="mapaUrl">Enlace de Google Maps (botón «Cómo llegar»)</label>
+              <input id="mapaUrl" name="mapaUrl" type="url" placeholder="https://maps.app.goo.gl/…">
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="grupo">
+          <legend>Contacto y registro</legend>
+          <div class="grupo__dos">
+            <div class="campo">
+              <label for="correo">Correo del ministerio</label>
+              <input id="correo" name="correo" type="email">
+            </div>
+            <div class="campo">
+              <label for="formularioQR">Formulario de registro (Google Forms)</label>
+              <input id="formularioQR" name="formularioQR" type="url" placeholder="https://forms.gle/…">
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="grupo">
+          <legend>Redes sociales</legend>
+          <p class="grupo__nota">Pega el enlace completo. Si una red se deja vacía, en el sitio aparece como «Próximamente».</p>
+          <div class="grupo__tres">
+            <div class="campo campo--red">
+              <label for="facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10v4h3v7h4v-7h3l1-4h-4V8a1 1 0 0 1 1-1h3V3h-3a5 5 0 0 0-5 5v2z"/></svg>Grupo de Facebook</label>
+              <input id="facebook" name="facebook" type="url" placeholder="https://www.facebook.com/groups/…">
+            </div>
+            <div class="campo campo--red">
+              <label for="tiktok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 7.9v4a10 10 0 0 1-5-1.9v4.5a6.5 6.5 0 1 1-8-6.3v4.3a2.5 2.5 0 1 0 4 2V3h4.1A6 6 0 0 0 21 7.9"/></svg>TikTok</label>
+              <input id="tiktok" name="tiktok" type="url" placeholder="https://www.tiktok.com/@…">
+            </div>
+            <div class="campo campo--red">
+              <label for="youtube"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/></svg>Canal de YouTube</label>
+              <input id="youtube" name="youtube" type="url" placeholder="https://www.youtube.com/@…">
+            </div>
+          </div>
+        </fieldset>
+        <div class="guardar">
+          <p>Los cambios se ven en el sitio apenas guardas.</p>
+          <button type="submit" class="boton">Guardar contacto y redes</button>
+        </div>
+      </form>
+
+    </section>
+
+    <!-- Videos en LESSA (HU-15, HU-16) -->
+    <section id="videos" role="tabpanel" aria-labelledby="tab-videos" class="panel__seccion" hidden>
+      <h1>Videos en LESSA</h1>
+      <p class="ayuda">Sube el video al canal de YouTube del ministerio, presiona «Compartir», copia el enlace y pégalo aquí.</p>
+      <form id="form-videos" class="textos">
+        <fieldset class="grupo">
+          <legend>Enlaces de YouTube</legend>
+          <div class="grupo__dos">
+            <div class="campo">
+              <label for="presentacion">Video de presentación del ministerio</label>
+              <input id="presentacion" name="presentacion" type="url" placeholder="https://youtu.be/…">
+              <p class="grupo__nota">Aparece en la página de inicio.</p>
+            </div>
+            <div class="campo">
+              <label for="usoSitio">Video de cómo usar el sitio</label>
+              <input id="usoSitio" name="usoSitio" type="url" placeholder="https://youtu.be/…">
+              <p class="grupo__nota">Aparece en la página Redes.</p>
+            </div>
+          </div>
+        </fieldset>
+        <div class="guardar">
+          <p>Los cambios se ven en el sitio apenas guardas.</p>
+          <button type="submit" class="boton">Guardar videos</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Galería (HU-22, HU-23) -->
+    <section id="galeria" role="tabpanel" aria-labelledby="tab-galeria" class="panel__seccion" hidden>
+      <h1>Galería</h1>
+      <div class="panel__dos">
+      <form id="form-galeria" class="grupo">
+        <h2 class="grupo__titulo">Subir una foto</h2>
+        <div class="campo">
+          <label for="foto">Foto (JPG, PNG o WEBP, máximo 10 MB)</label>
+          <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div class="campo">
+          <label for="descripcion-foto">Descripción de la foto</label>
+          <input id="descripcion-foto" name="descripcion" type="text" maxlength="150" placeholder="Ejemplo: Culto del aniversario del ministerio">
+          <p class="grupo__nota">Ayuda a las personas que no pueden ver la imagen.</p>
+        </div>
+        <div class="formulario__botones">
+          <button type="submit" class="boton">Subir foto</button>
+        </div>
+      </form>
+      <div>
+        <h2 class="grupo__titulo">Fotos publicadas</h2>
+        <ul id="lista-galeria" class="panel__fotos"></ul>
+      </div>
+      </div>
+    </section>
+
+    <section id="publicaciones" role="tabpanel" aria-labelledby="tab-publicaciones" class="panel__seccion" hidden></section>
+    <section id="biblioteca" role="tabpanel" aria-labelledby="tab-biblioteca" class="panel__seccion" hidden></section>
+    <section id="fechas" role="tabpanel" aria-labelledby="tab-fechas" class="panel__seccion" hidden></section>
+    <section id="lideres" role="tabpanel" aria-labelledby="tab-lideres" class="panel__seccion" hidden></section>
+  </main>
+  </div>
+
+  <!-- Ventana de confirmación (reemplaza el aviso gris del navegador) -->
+  <dialog id="confirmar" class="confirmar" aria-labelledby="confirmar-titulo" aria-describedby="confirmar-texto">
+    <form method="dialog">
+      <span class="confirmar__icono" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+      <h2 id="confirmar-titulo" data-titulo></h2>
+      <img data-imagen alt="" hidden>
+      <p id="confirmar-texto" data-texto></p>
+      <div class="confirmar__botones">
+        <button value="no" class="boton boton--claro" data-cancelar>Cancelar</button>
+        <button value="si" class="boton" data-aceptar>Aceptar</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
