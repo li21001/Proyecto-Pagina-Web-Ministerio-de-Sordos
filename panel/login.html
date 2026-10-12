@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#00696b">
+  <title>Iniciar sesión · Ministerio de Sordos</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/panel.css">
+  <script type="module" src="../js/login.js"></script>
+</head>
+<body class="acceso">
+  <aside class="acceso__marca">
+    <div class="acceso__logo">
+      <img src="../img/logo.svg" alt="">
+      <span>Ministerio de Sordos<small>Cojutepeque</small></span>
+    </div>
+    <div>
+      <h1>Panel del ministerio</h1>
+      <p>Desde aquí el equipo del ministerio mantiene la página al día, sin tocar código.</p>
+      <ul class="acceso__lista">
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Horarios y fechas especiales</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Fotos de la galería</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></svg>Publicaciones y materiales</li>
+      </ul>
+    </div>
+    <p class="acceso__nota"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Solo para la cuenta autorizada del ministerio.</p>
+  </aside>
+
+  <main class="acceso__lado">
+    <div class="acceso__caja">
+      <h2>Iniciar sesión</h2>
+      <p class="acceso__sub">Escribe el correo y la contraseña del ministerio.</p>
+
+      <div id="mensaje" class="mensaje" role="status" aria-live="polite" hidden></div>
+
+      <form id="form-entrar" class="formulario" novalidate>
+        <label for="correo">Correo</label>
+        <div class="campo-icono">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          <input id="correo" name="correo" type="email" autocomplete="username" placeholder="correo@gmail.com" required>
+        </div>
+
+        <label for="clave">Contraseña</label>
+        <div class="clave">
+          <div class="campo-icono">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input id="clave" name="clave" type="password" autocomplete="current-password" required>
+          </div>
+          <button type="button" id="ver-clave" class="clave__ver" aria-pressed="false">Mostrar</button>
+        </div>
+
+        <button type="submit" class="boton boton--ancho">Entrar al panel</button>
+        <button type="button" id="olvide" class="enlace-boton">¿Olvidaste tu contraseña?</button>
+      </form>
+
+      <form id="form-recuperar" class="formulario" novalidate hidden>
+        <p>Escribe el correo del panel y te enviaremos un enlace para crear una contraseña nueva.</p>
+        <label for="correo-recuperar">Correo</label>
+        <div class="campo-icono">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          <input id="correo-recuperar" type="email" autocomplete="username" required>
+        </div>
+        <button type="submit" class="boton boton--ancho">Enviar enlace</button>
+        <button type="button" id="volver" class="enlace-boton">Volver a iniciar sesión</button>
+      </form>
+
+      <p class="acceso__volver"><a href="../index.html">← Volver a la página del ministerio</a></p>
+    </div>
+  </main>
+</body>
+</html>
