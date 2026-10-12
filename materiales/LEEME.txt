@@ -1,0 +1,6 @@
+Aquí van los archivos PDF de la biblioteca (libros con señas y diccionarios de lengua de señas).
+Para publicarlos, agrega cada uno en js/config.js, en la lista "materiales", con este formato:
+
+{ titulo: "Nombre del material", tipo: "Libro", descripcion: "Descripción breve.", archivo: "materiales/nombre-del-archivo.pdf" }
+
+"archivo" también puede ser un enlace web (https://...) si el PDF está en otro sitio.
