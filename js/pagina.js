@@ -296,7 +296,10 @@
         var acciones = el("div", "material__acciones");
         var ver = el("a", "boton", "Ver en línea");
         enlaceExterno(ver, m.archivo);
-        ver.setAttribute("aria-label", "Ver en línea: " + m.titulo);
+        /* Única excepción: los materiales se abren en otra pestaña para no salir del sitio. */
+        ver.target = "_blank";
+        ver.rel = "noopener";
+        ver.setAttribute("aria-label", "Ver en línea: " + m.titulo + " (se abre en otra pestaña)");
         acciones.appendChild(ver);
         if (!/^https?:/i.test(m.archivo)) {
           var bajar = el("a", "boton boton--claro", "Descargar");
