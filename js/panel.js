@@ -228,16 +228,18 @@ const LISTAS = {
   },
   publicaciones: {
     titulo: "Publicaciones",
-    ayuda: "Pega el enlace de la publicación en Facebook, TikTok o YouTube. Las más recientes aparecen primero.",
+    ayuda: "Pega el enlace de la publicación en Facebook, TikTok o YouTube. Para que se vea llamativa, sube el afiche o una foto del evento. Si no subes imagen: los videos de YouTube muestran su portada solos y las demás publicaciones muestran un color y un dibujo según el tipo.",
     orden: ["fecha", "desc"],
     campos: [
       { id: "titulo", etiqueta: "Título", tipo: "text", requerido: true, ejemplo: "Culto de aniversario" },
       { id: "red", etiqueta: "Red social", tipo: "select", opciones: ["Facebook", "TikTok", "YouTube"], requerido: true },
+      { id: "tipo", etiqueta: "Tipo de publicación", tipo: "select", opciones: ["Celebración", "Culto", "Estudio bíblico", "Aviso", "Video"], requerido: true },
+      { id: "fecha", etiqueta: "Fecha", tipo: "date", requerido: true, hoy: true },
       { id: "enlace", etiqueta: "Enlace de la publicación", tipo: "url", requerido: true, ancho: true },
       { id: "texto", etiqueta: "Descripción breve (opcional)", tipo: "textarea" },
-      { id: "fecha", etiqueta: "Fecha", tipo: "date", requerido: true, hoy: true }
+      { id: "imagenUrl", etiqueta: "Imagen de portada (opcional)", tipo: "imagen", carpeta: "publicaciones" }
     ],
-    resumen: (d) => `<strong>${escapar(d.titulo)}</strong> · ${escapar(d.red)} · ${escapar(fechaLegible(d.fecha))}`,
+    resumen: (d) => `${d.imagenUrl ? `<img class="panel__mini-portada" src="${escapar(fotoOptimizada(d.imagenUrl, 160))}" alt="">` : ""}<strong>${escapar(d.titulo)}</strong> · ${escapar(d.red)}${d.tipo ? ` · ${escapar(d.tipo)}` : ""} · ${escapar(fechaLegible(d.fecha))}`,
     nombre: "la publicación"
   },
   biblioteca: {
@@ -255,14 +257,15 @@ const LISTAS = {
   },
   fechas: {
     titulo: "Fechas especiales",
-    ayuda: "Solo se muestran el día y el mes. Ejemplo: Aniversario del ministerio, 5 de marzo.",
+    ayuda: "El año no se muestra. Si la celebración dura todo el mes (por ejemplo, septiembre), elige «Solo el mes» y pon cualquier día de ese mes.",
     orden: ["fecha", "asc"],
     campos: [
       { id: "titulo", etiqueta: "Nombre de la fecha", tipo: "text", requerido: true },
       { id: "fecha", etiqueta: "Fecha", tipo: "date", requerido: true },
+      { id: "mostrar", etiqueta: "Cómo se muestra", tipo: "select", opciones: ["Día y mes", "Solo el mes"] },
       { id: "descripcion", etiqueta: "Explicación breve", tipo: "textarea", requerido: true }
     ],
-    resumen: (d) => `<strong>${escapar(d.titulo)}</strong> · ${escapar(fechaLegible(d.fecha, { day: "numeric", month: "long" }))}`,
+    resumen: (d) => `<strong>${escapar(d.titulo)}</strong> · ${escapar(d.mostrar === "Solo el mes" ? "todo " + fechaLegible(d.fecha, { month: "long" }) : fechaLegible(d.fecha, { day: "numeric", month: "long" }))}`,
     nombre: "la fecha"
   },
   lideres: {
@@ -289,6 +292,17 @@ function campoHTML(nombreLista, c) {
   const req = c.requerido ? " required" : "";
   const ph = c.ejemplo ? ` placeholder="Ejemplo: ${escapar(c.ejemplo)}"` : "";
   let control;
+  if (c.tipo === "imagen") {
+    return `<div class="campo campo--ancho campo-imagen">
+      <label for="${id}">${escapar(c.etiqueta)}</label>
+      <input id="${id}" name="${c.id}" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="${id}-ayuda">
+      <p class="ayuda" id="${id}-ayuda">JPG, PNG o WEBP de hasta 10 MB. Mejor si es horizontal (como una pantalla).</p>
+      <div class="campo-imagen__actual" data-imagen-actual hidden>
+        <img alt="Imagen actual de la publicación">
+        <label class="campo-imagen__quitar"><input type="checkbox" data-quitar-imagen> Quitar la imagen</label>
+      </div>
+    </div>`;
+  }
   if (c.tipo === "select") {
     control = `<select id="${id}" name="${c.id}"${req}><option value="">Elige una opción</option>${c.opciones.map((o) => `<option>${escapar(o)}</option>`).join("")}</select>`;
   } else if (c.tipo === "textarea") {
@@ -340,6 +354,8 @@ function crearLista(nombre) {
     cancelar.hidden = true;
     seccion.querySelector("[data-titulo-form]").textContent = "Agregar";
     cfg.campos.filter((c) => c.hoy).forEach((c) => { form.elements[c.id].value = hoyISO(); });
+    const actual = form.querySelector("[data-imagen-actual]");
+    if (actual) { actual.hidden = true; actual.querySelector("[data-quitar-imagen]").checked = false; }
     cambiosSinGuardar = false;
   };
 
@@ -367,6 +383,13 @@ function crearLista(nombre) {
     if (idEditar) {
       const r = registros.find((x) => x.id === idEditar);
       cfg.campos.forEach((c) => {
+        if (c.tipo === "imagen") {
+          const actual = form.querySelector("[data-imagen-actual]");
+          form.elements[c.id].value = "";
+          actual.hidden = !r[c.id];
+          if (r[c.id]) actual.querySelector("img").src = fotoOptimizada(r[c.id], 400);
+          return;
+        }
         form.elements[c.id].value = c.tipo === "date" ? aISO(r[c.id]) : (r[c.id] ?? "");
       });
       editando = idEditar;
@@ -409,8 +432,15 @@ function crearLista(nombre) {
       form.elements[enlaceMalo.id].focus();
       return;
     }
+    const campoImagen = cfg.campos.find((c) => c.tipo === "imagen");
+    const archivo = campoImagen ? form.elements[campoImagen.id].files[0] : null;
+    if (archivo) {
+      const problema = revisarImagen(archivo);
+      if (problema) { avisar(problema, "error"); form.elements[campoImagen.id].focus(); return; }
+    }
     const datos = {};
     cfg.campos.forEach((c) => {
+      if (c.tipo === "imagen") return;
       const v = form.elements[c.id].value.trim();
       if (c.tipo === "number") datos[c.id] = Number(v);
       else if (c.tipo === "date") datos[c.id] = Timestamp.fromDate(new Date(`${v}T12:00:00`));
@@ -419,6 +449,18 @@ function crearLista(nombre) {
     const boton = e.submitter;
     boton.disabled = true;
     try {
+      if (campoImagen) {
+        const quitar = form.querySelector("[data-quitar-imagen]");
+        if (archivo) {
+          avisar("Subiendo la imagen…", "info");
+          const subida = await subirACloudinary(archivo, campoImagen.carpeta);
+          datos[campoImagen.id] = subida.secure_url;
+          datos.imagenId = subida.public_id;
+        } else if (quitar && quitar.checked) {
+          datos[campoImagen.id] = "";
+          datos.imagenId = "";
+        }
+      }
       if (editando) await updateDoc(doc(db, nombre, editando), datos);
       else await addDoc(collection(db, nombre), datos);
       const accion = editando ? "Cambios guardados" : "Guardado";
@@ -440,12 +482,20 @@ function crearLista(nombre) {
 const TAMANO_MAXIMO = 10 * 1024 * 1024;
 const TIPOS_PERMITIDOS = ["image/jpeg", "image/png", "image/webp"];
 
-async function subirACloudinary(archivo) {
+// Revisa una imagen antes de subirla. Devuelve el problema en palabras sencillas, o null si está bien.
+function revisarImagen(archivo) {
+  if (!TIPOS_PERMITIDOS.includes(archivo.type)) return "Ese archivo no es una imagen. Solo se permiten JPG, PNG o WEBP (no videos ni PDF).";
+  if (archivo.size > TAMANO_MAXIMO) return `La imagen pesa ${(archivo.size / 1048576).toFixed(1)} MB. El máximo es 10 MB.`;
+  if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) return "Falta configurar el servicio de imágenes. Avisa al equipo técnico.";
+  return null;
+}
+
+async function subirACloudinary(archivo, carpeta = "galeria") {
   const { cloudName, uploadPreset } = cloudinaryConfig;
   const datos = new FormData();
   datos.append("file", archivo);
   datos.append("upload_preset", uploadPreset);
-  datos.append("folder", "galeria");
+  datos.append("folder", carpeta);
   const respuesta = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: datos });
   if (!respuesta.ok) throw new Error(`Cloudinary respondió ${respuesta.status}`);
   return respuesta.json();

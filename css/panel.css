@@ -222,3 +222,17 @@
 .panel__fotos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
 .panel__fotos p { font-size: 0.95rem; margin: 0.5rem 0; }
 .panel__fotos .vacio, .panel__lista .vacio { display: block; box-shadow: none; }
+
+/* Errores del inicio de sesión: detalle del mensaje, recuadro en rojo y aviso de mayúsculas */
+.mensaje small { display: block; font-weight: 400; margin-top: 0.35rem; color: var(--tinta); }
+.acceso input[aria-invalid="true"] { border-color: var(--error); box-shadow: 0 0 0 3px #fdecea; }
+.aviso-mayus { margin: -0.4rem 0 0.8rem; font-size: 0.9rem; font-weight: 700; color: var(--error); }
+
+/* Publicaciones: imagen de portada en el formulario y miniatura en la lista */
+.campo-imagen input[type="file"] { padding: 0.6rem; background: var(--blanco, #fff); border: 2px dashed var(--aqua-oscuro, #00696b); border-radius: 12px; cursor: pointer; }
+.campo-imagen .ayuda { margin: 0.35rem 0 0; font-size: 0.9rem; }
+.campo-imagen__actual { display: flex; align-items: center; gap: 1rem; margin-top: 0.6rem; flex-wrap: wrap; }
+.campo-imagen__actual img { width: 160px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; border: 1px solid var(--borde, #dcefef); }
+.campo-imagen .campo-imagen__quitar { display: inline-flex; flex-direction: row; align-items: center; gap: 0.5rem; width: auto; margin: 0; font-weight: 700; cursor: pointer; }
+.campo-imagen__quitar input { width: 1.2rem; height: 1.2rem; margin: 0; }
+.panel__lista .panel__mini-portada { display: inline-block; width: 56px; height: 32px; object-fit: cover; border-radius: 6px; vertical-align: middle; margin-right: 0.5rem; }

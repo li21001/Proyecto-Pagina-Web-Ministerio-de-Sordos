@@ -5,10 +5,10 @@
 window.SITIO = {
   // Textos institucionales. Deja una línea en blanco (\n\n) para separar párrafos.
   textos: {
-    resena: "El Ministerio de Sordos del Tabernáculo Bíblico Bautista «Amigos de Israel» es un espacio donde las personas sordas pueden disfrutar de la Palabra de Dios, alabar y adorar. Acompañamos a la comunidad sorda con estudios bíblicos, cultos con interpretación en Lengua de Señas Salvadoreña (LESSA) y actividades de convivencia.",
+    resena: "El Ministerio de Sordos del Tabernáculo Bíblico Bautista «Amigos de Israel», en Cojutepeque, es un espacio donde las personas sordas pueden disfrutar de la Palabra de Dios, alabar y adorar. Cada domingo a las 9:00 a. m. tenemos clase bíblica para personas sordas, y nuestros cultos cuentan con interpretación en Lengua de Señas Salvadoreña (LESSA).",
     mision: "Tener un espacio donde todas las personas sordas tengan la oportunidad de disfrutar de la Palabra de Dios, alabar y adorar.",
-    vision: "Alcanzar a cada persona sorda que visita nuestra iglesia o nos sigue en redes sociales, y llegar a ser un referente para la comunidad sorda en la ciudad de Cojutepeque.",
-    historia: "El Ministerio de Sordos nació el 5 de marzo de 2008 en el corazón de la Licda. Gloria Orellana, maestra de la escuela de sordos de Cojutepeque, quien junto a los hermanos Miguel Rivera, Yesica Sánchez y otros servidores asumió el compromiso de romper las barreras de la comunicación.\n\nSu primer alumno fue un estudiante de la escuela de sordos de la ciudad y, con el tiempo, se fueron sumando más personas. Desde 2021 el ministerio cuenta con una estructura organizada, con coordinaciones social, evangelística y bíblica, y un equipo de seis intérpretes de lengua de señas.",
+    vision: "Llegar a cada persona sorda que nos visita en nuestra iglesia o nos sigue en nuestras redes sociales, y ser un referente para la comunidad sorda en la ciudad de Cojutepeque.",
+    historia: "El Ministerio de Sordos nació el 5 de marzo de 2008 en el corazón de la Licda. Gloria Orellana, maestra de la escuela de sordos de Cojutepeque, quien junto a los hermanos Miguel Rivera, Yesica Sánchez y otros servidores asumió el compromiso de romper las barreras de la comunicación.\n\nSu primer alumno fue un estudiante de la escuela de sordos de la ciudad y, con el tiempo, se fueron sumando más personas. Desde 2021 el ministerio cuenta con una estructura organizada, con coordinaciones social, evangelística y bíblica, y un equipo de seis intérpretes de lengua de señas.\n\nCada año celebramos el aniversario del ministerio en marzo y, durante todo septiembre, el mes de la persona sorda.",
     culturaSorda: ""
   },
 
@@ -21,9 +21,10 @@ window.SITIO = {
 
   // Horarios de reunión
   horarios: [
-    { dia: "Miércoles", actividad: "Estudio Bíblico", hora: "6:30 p. m." },
-    { dia: "Viernes", actividad: "Adoración y Milagros", hora: "6:00 p. m." },
-    { dia: "Domingo", actividad: "Cultos", hora: "7:00 a. m., 9:00 a. m. y 5:00 p. m." }
+    { dia: "Domingo", actividad: "Clase bíblica para personas sordas (en LESSA)", hora: "9:00 a. m." },
+    { dia: "Domingo", actividad: "Cultos con interpretación en LESSA", hora: "7:00 a. m. y 5:00 p. m." },
+    { dia: "Miércoles", actividad: "Estudio Bíblico con interpretación", hora: "6:30 p. m." },
+    { dia: "Viernes", actividad: "Adoración y Milagros con interpretación", hora: "6:00 p. m." }
   ],
 
   // Dirección y mapa
@@ -39,8 +40,10 @@ window.SITIO = {
 
   // Fechas especiales: día (número o vacío) y mes
   fechas: [
-    { titulo: "Aniversario del ministerio", dia: "5", mes: "marzo", descripcion: "Fundado en 2008." },
-    { titulo: "Día Internacional de las Personas Sordas", dia: "", mes: "septiembre", descripcion: "Se celebra durante la Semana Internacional de las Personas Sordas." }
+    { titulo: "Aniversario del ministerio", dia: "5", mes: "marzo", descripcion: "Celebramos el cumpleaños del ministerio, que nació en marzo de 2008 en Cojutepeque." },
+    { titulo: "Mes de la persona sorda", dia: "", mes: "septiembre", descripcion: "Durante todo septiembre celebramos a la comunidad sorda. En 2026 lo celebramos el domingo 13 en nuestro ministerio y el domingo 20 participamos en la celebración del Tabernáculo central." },
+    { titulo: "Día Internacional de las Lenguas de Señas", dia: "23", mes: "septiembre", descripcion: "Proclamado por las Naciones Unidas; recuerda la fundación de la Federación Mundial de Sordos, el 23 de septiembre de 1951." },
+    { titulo: "Semana Internacional de las Personas Sordas", dia: "", mes: "septiembre", descripcion: "Se celebra cada año en la última semana completa de septiembre, convocada por la Federación Mundial de Sordos." }
   ],
 
   // Estructura del ministerio. Si publicarNombres es false, solo se muestran los cargos.
@@ -76,7 +79,7 @@ window.SITIO = {
 
   // Redes sociales: el botón aparece cuando tienen enlace
   redes: [
-    { nombre: "Facebook", descripcion: "Grupo de Facebook del ministerio.", url: "" },
+    { nombre: "Facebook", descripcion: "Página de Facebook del ministerio.", url: "" },
     { nombre: "TikTok", descripcion: "Cuenta de TikTok del ministerio.", url: "" },
     { nombre: "YouTube", descripcion: "Canal con videos en LESSA: la presentación del ministerio y cómo usar la página.", url: "" }
   ]

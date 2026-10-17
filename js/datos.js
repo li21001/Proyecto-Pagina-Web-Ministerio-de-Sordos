@@ -102,7 +102,7 @@ function aplicar(d) {
     S.fechas = fechas.map((f) => {
       const fecha = aFecha(f.fecha);
       return { titulo: f.titulo, descripcion: f.descripcion || "",
-        dia: fecha ? String(fecha.getDate()) : "", mes: fecha ? MESES[fecha.getMonth()] : "" };
+        dia: fecha && f.mostrar !== "Solo el mes" ? String(fecha.getDate()) : "", mes: fecha ? MESES[fecha.getMonth()] : "" };
     });
   }
   const lideres = conCampos(d.lideres || [], "nombre", "cargo");
@@ -117,7 +117,10 @@ function aplicar(d) {
   if (publicaciones.length) {
     S.publicaciones = publicaciones.map((p) => {
       const f = aFecha(p.fecha);
-      return { red: p.red, titulo: p.titulo, texto: p.texto, fecha: f ? f.toLocaleDateString("en-CA") : "", url: p.enlace };
+      const yt = idYouTube(p.enlace);
+      return { red: p.red, tipo: p.tipo || "", titulo: p.titulo, texto: p.texto, fecha: f ? f.toLocaleDateString("en-CA") : "", url: p.enlace,
+        imagen: p.imagenUrl ? fotoOptimizada(p.imagenUrl, 800) : "",
+        miniatura: yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : "" };
     });
   }
   const biblioteca = conCampos(d.biblioteca || [], "titulo", "enlaceDrive");

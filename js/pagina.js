@@ -35,7 +35,9 @@
   }
   function enlaceExterno(a, url) {
     a.href = url;
-    /* Todo se abre en la misma pestaña (pedido del equipo). */
+    /* Los enlaces a otras páginas (redes, publicaciones, PDF) se abren en otra pestaña;
+       la navegación dentro del sitio sigue en la misma pestaña. */
+    if (/^https?:|\.pdf$/i.test(url)) { a.target = "_blank"; a.rel = "noopener"; }
   }
   var ICONOS = {
     Facebook: '<path d="M7 10v4h3v7h4v-7h3l1-4h-4V8a1 1 0 0 1 1-1h3V3h-3a5 5 0 0 0-5 5v2z"/>',
@@ -134,7 +136,7 @@
       $("correo-contacto").hidden = true;
     }
   }
-  if ($("como-llegar") && S.mapaEnlace) { $("como-llegar").href = S.mapaEnlace; $("como-llegar").hidden = false; }
+  if ($("como-llegar") && S.mapaEnlace) { enlaceExterno($("como-llegar"), S.mapaEnlace); $("como-llegar").hidden = false; }
   if ($("mapa") && S.mapa) {
     var mapa = document.createElement("iframe");
     mapa.src = S.mapa; mapa.loading = "lazy"; mapa.referrerPolicy = "no-referrer-when-downgrade";
@@ -143,16 +145,60 @@
     $("mapa").appendChild(mapa);
   }
 
+  /* ---------- Portada de las publicaciones ----------
+     1) la imagen que se subió en el panel; 2) si es un video de YouTube, su miniatura;
+     3) si no hay ninguna, un color y un dibujo según el tipo de publicación. */
+  var TIPOS = {
+    "Celebración": { emoji: "🎉", clase: "dorado" },
+    "Culto": { emoji: "🙏", clase: "aqua" },
+    "Estudio bíblico": { emoji: "📖", clase: "verde" },
+    "Aviso": { emoji: "📢", clase: "lila" },
+    "Video": { emoji: "🎬", clase: "tinta" }
+  };
+  function tipoDe(p) {
+    return TIPOS[p.tipo] ? p.tipo : (p.red === "YouTube" || p.red === "TikTok" ? "Video" : "Aviso");
+  }
+  function portada(p, chica) {
+    var caja = el("span", "portada" + (chica ? " portada--chica" : ""));
+    caja.setAttribute("aria-hidden", "true");
+    var imagen = p.imagen || p.miniatura;
+    if (imagen) {
+      var img = el("img"); img.src = imagen; img.alt = ""; img.loading = "lazy";
+      /* Si la imagen no carga, se muestra la portada de color. */
+      img.onerror = function () { caja.replaceWith(portada({ tipo: p.tipo, red: p.red }, chica)); };
+      caja.appendChild(img);
+      if (!p.imagen && p.miniatura) caja.appendChild(el("span", "portada__play", "▶"));
+      return caja;
+    }
+    var t = tipoDe(p);
+    caja.className += " portada--" + TIPOS[t].clase;
+    caja.appendChild(el("span", "portada__emoji", TIPOS[t].emoji));
+    if (!chica) caja.appendChild(el("span", "portada__tipo", t));
+    return caja;
+  }
+  function chipRed(red) {
+    var c = el("span", "chip chip--" + String(red || "red").toLowerCase(), red || "Publicación");
+    return c;
+  }
+  function esNueva(iso) {
+    if (!iso) return false;
+    var dias = (Date.now() - new Date(iso + "T12:00:00").getTime()) / 86400000;
+    return dias >= -1 && dias <= 7;
+  }
+
   /* ---------- Vistas previas del inicio ---------- */
   var prevPub = $("prev-publicaciones");
   if (prevPub) {
     var pubs = (S.publicaciones || []).slice(0, 2);
     prevPub.textContent = "";
     pubs.forEach(function (p) {
-      var d = el("div", "mini");
-      d.appendChild(el("span", "chip", p.red || "Publicación"));
-      d.appendChild(el("p", "mini__titulo", p.titulo));
-      if (p.fecha) d.appendChild(el("p", "mini__fecha", fechaLarga(p.fecha)));
+      var d = el("div", "mini mini--pub");
+      d.appendChild(portada(p, true));
+      var cuerpo = el("div", "mini__cuerpo");
+      cuerpo.appendChild(chipRed(p.red));
+      cuerpo.appendChild(el("p", "mini__titulo", p.titulo));
+      if (p.fecha) cuerpo.appendChild(el("p", "mini__fecha", fechaLarga(p.fecha)));
+      d.appendChild(cuerpo);
       prevPub.appendChild(d);
     });
     if (!pubs.length) prevPub.appendChild(el("p", "mini mini--vacio", "Pronto compartiremos aquí las novedades del ministerio."));
@@ -188,8 +234,10 @@
     (S.fechas || []).forEach(function (f) {
       var li = el("li", "fecha");
       var cal = el("div", "fecha__cal" + (f.dia ? "" : " fecha__cal--mes"));
-      if (f.dia) cal.appendChild(el("span", "fecha__num", f.dia));
-      cal.appendChild(el("span", "fecha__mes", f.dia ? String(f.mes || "").slice(0, 3) : f.mes));
+      /* Con día: «5 / MAR». Sin día (se celebra todo el mes): «SEP / todo el mes». */
+      cal.appendChild(el("span", "fecha__num", f.dia || String(f.mes || "").slice(0, 3)));
+      cal.appendChild(el("span", "fecha__mes", f.dia ? String(f.mes || "").slice(0, 3) : "todo el mes"));
+      if (!f.dia) cal.setAttribute("aria-label", "Todo el mes de " + f.mes);
       var texto = el("div");
       texto.appendChild(el("p", "fecha__titulo", f.titulo));
       if (f.descripcion) texto.appendChild(el("p", "fecha__desc", f.descripcion));
@@ -263,11 +311,17 @@
       var li = el("li", "publicacion");
       var a = el("a");
       enlaceExterno(a, p.url || "#");
-      a.appendChild(el("span", "chip", p.red || "Publicación"));
-      a.appendChild(el("span", "publicacion__titulo", p.titulo));
-      if (p.texto) a.appendChild(el("span", "publicacion__texto", p.texto));
-      if (p.fecha) a.appendChild(el("span", "publicacion__fecha", fechaLarga(p.fecha)));
-      a.appendChild(el("span", "publicacion__ver", "Ver en " + (p.red || "la red social") + " →"));
+      a.appendChild(portada(p, false));
+      var cuerpo = el("span", "publicacion__cuerpo");
+      var chips = el("span", "publicacion__chips");
+      chips.appendChild(chipRed(p.red));
+      if (esNueva(p.fecha)) chips.appendChild(el("span", "chip chip--nuevo", "Nuevo"));
+      cuerpo.appendChild(chips);
+      cuerpo.appendChild(el("span", "publicacion__titulo", p.titulo));
+      if (p.texto) cuerpo.appendChild(el("span", "publicacion__texto", p.texto));
+      if (p.fecha) cuerpo.appendChild(el("span", "publicacion__fecha", fechaLarga(p.fecha)));
+      cuerpo.appendChild(el("span", "publicacion__ver", (p.red === "YouTube" ? "Ver el video en YouTube" : "Ver en " + (p.red || "la red social")) + " →"));
+      a.appendChild(cuerpo);
       li.appendChild(a);
       listaPub.appendChild(li);
     });
@@ -277,7 +331,7 @@
   /* ---------- Registro ---------- */
   var registro = $("enlace-registro");
   if (registro) {
-    if (S.formularioRegistro) registro.href = S.formularioRegistro;
+    if (S.formularioRegistro) enlaceExterno(registro, S.formularioRegistro);
     else registro.hidden = true;
   }
 
@@ -296,9 +350,6 @@
         var acciones = el("div", "material__acciones");
         var ver = el("a", "boton", "Ver en línea");
         enlaceExterno(ver, m.archivo);
-        /* Única excepción: los materiales se abren en otra pestaña para no salir del sitio. */
-        ver.target = "_blank";
-        ver.rel = "noopener";
         ver.setAttribute("aria-label", "Ver en línea: " + m.titulo + " (se abre en otra pestaña)");
         acciones.appendChild(ver);
         if (!/^https?:/i.test(m.archivo)) {
