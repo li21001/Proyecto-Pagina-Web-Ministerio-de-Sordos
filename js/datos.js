@@ -132,7 +132,8 @@ function aplicar(d) {
 function dibujar() {
   if (window.SITIO_DIBUJADO) return;
   const s = document.createElement("script");
-  s.src = (document.body.dataset.raiz || "") + "js/pagina.js";
+  /* Usa la misma versión (?v=…) con la que se cargó este archivo, para no quedarse con una copia vieja. */
+  s.src = (document.body.dataset.raiz || "") + "js/pagina.js" + new URL(import.meta.url).search;
   document.body.appendChild(s);
 }
 

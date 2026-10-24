@@ -89,7 +89,7 @@ onAuthStateChanged(auth, (usuario) => {
 
 const parametros = new URLSearchParams(location.search);
 if (parametros.get("salida") === "1") mostrar("Cerraste sesión correctamente.", "exito");
-if (parametros.get("error") === "permiso") mostrar("Esta cuenta no tiene permiso para usar el panel.", "error");
+if (parametros.get("error") === "permiso") mostrar("Esta cuenta no tiene permiso para usar el panel.", "error", "Puede que haya sido desactivada. Pide a un encargado que la reactive en Panel → Usuarios.");
 
 $("ver-clave").addEventListener("click", (e) => {
   const visible = $("clave").type === "text";

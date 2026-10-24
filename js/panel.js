@@ -1,16 +1,20 @@
 // Panel de administración: protege el acceso y permite gestionar el contenido del sitio.
 // HU-17 a HU-26 y HU-28 (registro de materiales).
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {
   doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, getDocs,
-  query, orderBy, serverTimestamp, Timestamp
+  query, where, orderBy, serverTimestamp, Timestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { cloudinaryConfig } from "./config.js";
+import { cloudinaryConfig, firebaseConfig } from "./config.js";
 import { escapar, idYouTube, fotoOptimizada, fechaLegible, esEnlaceValido } from "./util.js";
 
 const $ = (id) => document.getElementById(id);
 let cambiosSinGuardar = false;
+let yo = null; // usuario con la sesión abierta
 
 // ---------- Mensajes ----------
 let temporizador;
@@ -80,6 +84,7 @@ onAuthStateChanged(auth, async (usuario) => {
   $("usuario").textContent = usuario.email;
   $("usuario").title = usuario.email;
   if (usuario.displayName) $("usuario-nombre").textContent = usuario.displayName;
+  yo = usuario;
   document.body.classList.remove("verificando");
   iniciarPanel();
 });
@@ -584,6 +589,232 @@ function prepararGaleria() {
   return cargarGaleria();
 }
 
+
+// ---------- Usuarios del panel (CC-24) ----------
+// Dónde se guarda cada cosa:
+// · Firebase Authentication: la cuenta (correo y contraseña cifrada). Nadie ve la contraseña.
+// · Firestore «admins/{uid}»: el permiso para usar el panel. Si no existe, no se puede entrar.
+// · Firestore «usuarios/{uid}»: los datos que se ven en esta sección (nombre, cargo, correo, estado).
+// Crear: se usa una conexión secundaria para no cerrar la sesión de quien está agregando.
+// Desactivar: quita el permiso (admins) y deja el registro. Eliminar: quita el permiso y lo saca de la lista.
+// La cuenta de Authentication solo se borra del todo desde la consola de Firebase (plan gratuito).
+const ERRORES_USUARIO = {
+  "auth/email-already-in-use": "Ese correo ya tiene una cuenta. Si era un usuario eliminado, se reactivó.",
+  "auth/invalid-email": "El correo no es válido. Debe llevar @ y un dominio, por ejemplo: nombre@gmail.com.",
+  "auth/network-request-failed": "No hay conexión a internet. Revisa tu conexión e inténtalo de nuevo.",
+  "auth/too-many-requests": "Hubo muchos intentos seguidos. Espera unos minutos y vuelve a intentarlo.",
+  "auth/operation-not-allowed": "El acceso con correo y contraseña no está activado en Firebase. Avisa al equipo técnico."
+};
+const correoValido = (c) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c);
+const claveTemporal = () => {
+  const n = new Uint32Array(4);
+  crypto.getRandomValues(n);
+  return [...n].map((x) => x.toString(36)).join("") + "Aa1!";
+};
+
+async function crearCuenta(correo) {
+  const secundaria = initializeApp(firebaseConfig, `alta-${Date.now()}`);
+  try {
+    const authSec = getAuth(secundaria);
+    const credencial = await createUserWithEmailAndPassword(authSec, correo, claveTemporal());
+    await signOut(authSec);
+    return credencial.user.uid;
+  } finally {
+    await deleteApp(secundaria);
+  }
+}
+
+function prepararUsuarios() {
+  const form = $("form-usuario");
+  const lista = $("lista-usuarios");
+  const cancelar = form.querySelector("[data-cancelar]");
+  const tituloForm = form.querySelector("[data-titulo-form]");
+  let registros = [];
+  let editando = null;
+
+  const limpiar = () => {
+    form.reset();
+    editando = null;
+    cancelar.hidden = true;
+    tituloForm.textContent = "Agregar usuario";
+    $("usuario-correo").disabled = false;
+    $("usuario-terminos-caja").hidden = false;
+    cambiosSinGuardar = false;
+  };
+
+  // La cuenta con la que se entra siempre tiene su ficha (la crea la primera vez).
+  const asegurarMiFicha = async () => {
+    const ref = doc(db, "usuarios", yo.uid);
+    const ficha = await getDoc(ref);
+    if (!ficha.exists()) {
+      await setDoc(ref, {
+        nombre: yo.displayName || "Cuenta del ministerio", cargo: "Administración",
+        correo: yo.email, activo: true, eliminado: false, creado: serverTimestamp()
+      });
+    } else if (ficha.data().nombre) {
+      $("usuario-nombre").textContent = ficha.data().nombre;
+    }
+  };
+
+  const cargar = async () => {
+    const snap = await getDocs(query(collection(db, "usuarios"), orderBy("nombre")));
+    registros = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => !u.eliminado);
+    lista.innerHTML = registros.length ? registros.map((u) => {
+      const soyYo = u.id === yo.uid;
+      const estado = soyYo ? '<span class="usuario__estado usuario__estado--yo">Tú</span>'
+        : u.activo ? '<span class="usuario__estado">Activo</span>'
+        : '<span class="usuario__estado usuario__estado--off">Desactivado</span>';
+      const acciones = soyYo ? "" : `
+          <button type="button" class="boton boton--claro boton--chico" data-estado="${u.id}">${u.activo ? "Desactivar" : "Reactivar"}</button>
+          <button type="button" class="boton boton--peligro boton--chico" data-eliminar="${u.id}">Eliminar</button>`;
+      return `
+      <li>
+        <span class="usuario__datos">
+          <strong>${escapar(u.nombre)}</strong>
+          <span>${escapar(u.cargo || "")}</span>
+          <span class="usuario__correo">${escapar(u.correo)}</span>
+          ${estado}
+        </span>
+        <span class="panel__botones">
+          <button type="button" class="boton boton--claro boton--chico" data-editar="${u.id}">Editar</button>
+          <button type="button" class="boton boton--claro boton--chico" data-clave="${u.id}">Enviar enlace de contraseña</button>
+          ${acciones}
+        </span>
+      </li>`;
+    }).join("") : '<li class="vacio">Todavía no hay usuarios.</li>';
+  };
+
+  vigilarCambios(form);
+  cancelar.addEventListener("click", limpiar);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nombre = form.elements.nombre.value.trim();
+    const cargo = form.elements.cargo.value.trim();
+    const correo = form.elements.correo.value.trim().toLowerCase();
+    if (!nombre) { avisar("Falta el nombre completo.", "error"); form.elements.nombre.focus(); return; }
+    if (!cargo) { avisar("Falta el cargo en el ministerio.", "error"); form.elements.cargo.focus(); return; }
+    const boton = e.submitter;
+    if (editando) {
+      boton.disabled = true;
+      try {
+        await updateDoc(doc(db, "usuarios", editando), { nombre, cargo });
+        if (editando === yo.uid) $("usuario-nombre").textContent = nombre;
+        limpiar();
+        await cargar();
+        avisar("Cambios guardados.");
+      } catch (error) {
+        avisar(errorAmigable(error), "error");
+      } finally {
+        boton.disabled = false;
+      }
+      return;
+    }
+    if (!correo) { avisar("Falta el correo.", "error"); form.elements.correo.focus(); return; }
+    if (!correoValido(correo)) { avisar(`El correo «${correo}» está incompleto. Debe llevar @ y un dominio, por ejemplo: nombre@gmail.com.`, "error"); form.elements.correo.focus(); return; }
+    if (!$("usuario-terminos").checked) { avisar("Marca la casilla de los Términos y condiciones: la persona debe conocerlos antes de tener acceso.", "error"); $("usuario-terminos").focus(); return; }
+    boton.disabled = true;
+    avisar("Creando el usuario…", "info");
+    try {
+      let uid;
+      let reactivado = false;
+      try {
+        uid = await crearCuenta(correo);
+      } catch (error) {
+        if (error.code !== "auth/email-already-in-use") throw error;
+        // El correo ya tenía cuenta: si era un usuario eliminado o desactivado, se reactiva.
+        const previo = await getDocs(query(collection(db, "usuarios"), where("correo", "==", correo)));
+        if (previo.empty) {
+          avisar("Ese correo ya tiene una cuenta en Firebase, pero no está en esta lista. El equipo técnico debe borrarla desde la consola de Firebase para poder agregarla aquí.", "error");
+          return;
+        }
+        uid = previo.docs[0].id;
+        reactivado = true;
+      }
+      await setDoc(doc(db, "admins", uid), { correo, desde: serverTimestamp() });
+      await setDoc(doc(db, "usuarios", uid), {
+        nombre, cargo, correo, activo: true, eliminado: false,
+        aceptoTerminos: true, creado: serverTimestamp(), creadoPor: yo.email
+      }, { merge: true });
+      let correoEnviado = true;
+      try { await sendPasswordResetEmail(auth, correo); } catch (error) { correoEnviado = false; console.warn(error); }
+      limpiar();
+      await cargar();
+      avisar(`${reactivado ? "Usuario reactivado" : "Usuario creado"}: ${nombre}. ` + (correoEnviado
+        ? `Le enviamos a ${correo} un enlace para crear su contraseña (que revise también la carpeta de spam).`
+        : "No se pudo enviar el correo de la contraseña; usa «Enviar enlace de contraseña» en la lista."));
+    } catch (error) {
+      avisar(ERRORES_USUARIO[error.code] || errorAmigable(error), "error");
+    } finally {
+      boton.disabled = false;
+    }
+  });
+
+  lista.addEventListener("click", async (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const id = b.dataset.editar || b.dataset.clave || b.dataset.estado || b.dataset.eliminar;
+    const u = registros.find((x) => x.id === id);
+    if (!u) return;
+    try {
+      if (b.dataset.editar) {
+        form.elements.nombre.value = u.nombre || "";
+        form.elements.cargo.value = u.cargo || "";
+        form.elements.correo.value = u.correo || "";
+        $("usuario-correo").disabled = true;
+        $("usuario-terminos-caja").hidden = true;
+        editando = id;
+        cancelar.hidden = false;
+        tituloForm.textContent = "Editar usuario";
+        form.scrollIntoView({ behavior: "smooth" });
+        form.elements.nombre.focus();
+      } else if (b.dataset.clave) {
+        const ok = await confirmar({
+          titulo: "¿Enviar enlace de contraseña?",
+          texto: `Le llegará a ${u.correo} un correo para crear una contraseña nueva. La contraseña anterior deja de servir cuando la cambie.`,
+          aceptar: "Sí, enviar"
+        });
+        if (!ok) return;
+        await sendPasswordResetEmail(auth, u.correo);
+        avisar(`Enlace enviado a ${u.correo}. Que revise también la carpeta de spam.`);
+      } else if (b.dataset.estado) {
+        const activar = !u.activo;
+        if (!activar) {
+          const ok = await confirmar({
+            titulo: `¿Desactivar a ${u.nombre}?`,
+            texto: "Ya no podrá entrar al panel. Puedes reactivarlo cuando quieras.",
+            aceptar: "Sí, desactivar", peligro: true
+          });
+          if (!ok) return;
+          await deleteDoc(doc(db, "admins", id));
+        } else {
+          await setDoc(doc(db, "admins", id), { correo: u.correo, desde: serverTimestamp() });
+        }
+        await updateDoc(doc(db, "usuarios", id), { activo: activar });
+        await cargar();
+        avisar(activar ? `${u.nombre} puede volver a entrar al panel.` : `${u.nombre} ya no puede entrar al panel.`);
+      } else if (b.dataset.eliminar) {
+        const ok = await confirmar({
+          titulo: `¿Eliminar a ${u.nombre}?`,
+          texto: "Ya no podrá entrar al panel y saldrá de esta lista. Si después lo vuelves a agregar con el mismo correo, se reactiva.",
+          aceptar: "Sí, eliminar", peligro: true
+        });
+        if (!ok) return;
+        await deleteDoc(doc(db, "admins", id));
+        await updateDoc(doc(db, "usuarios", id), { activo: false, eliminado: true });
+        if (editando === id) limpiar();
+        await cargar();
+        avisar(`${u.nombre} fue eliminado y ya no puede entrar al panel.`);
+      }
+    } catch (error) {
+      avisar(ERRORES_USUARIO[error.code] || errorAmigable(error), "error");
+    }
+  });
+
+  limpiar();
+  return asegurarMiFicha().then(cargar);
+}
+
 // ---------- Resumen ----------
 async function cargarResumen() {
   $("hoy").textContent = new Date().toLocaleDateString("es-SV", { weekday: "long", day: "numeric", month: "long" })
@@ -625,6 +856,7 @@ async function iniciarPanel() {
         return malo ? "Ese enlace no es de un video de YouTube. Cópialo desde el botón «Compartir» del video." : "";
       }),
       prepararGaleria(),
+      prepararUsuarios(),
       ...Object.keys(LISTAS).map(crearLista)
     ]);
   } catch (error) {

@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/estilos.css">
-  <link rel="stylesheet" href="../css/panel.css">
-  <script src="../js/contenido.js"></script>
-  <script type="module" src="../js/panel.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css?v=20261024">
+  <link rel="stylesheet" href="../css/panel.css?v=20261024">
+  <script src="../js/contenido.js?v=20261024"></script>
+  <script type="module" src="../js/panel.js?v=20261024"></script>
 </head>
 <body class="panel verificando">
   <p class="panel__verificando" role="status">Verificando el acceso…</p>
@@ -47,6 +47,7 @@
         <button role="tab" type="button" id="tab-biblioteca" aria-controls="biblioteca" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Biblioteca</button>
         <button role="tab" type="button" id="tab-fechas" aria-controls="fechas" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Fechas especiales</button>
         <button role="tab" type="button" id="tab-lideres" aria-controls="lideres" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.9"/></svg>Estructura</button>
+        <button role="tab" type="button" id="tab-usuarios" aria-controls="usuarios" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M19 4v4M17 6h4"/></svg>Usuarios</button>
     </nav>
 
     <div class="panel__salidas">
@@ -244,6 +245,32 @@
     <section id="biblioteca" role="tabpanel" aria-labelledby="tab-biblioteca" class="panel__seccion" hidden></section>
     <section id="fechas" role="tabpanel" aria-labelledby="tab-fechas" class="panel__seccion" hidden></section>
     <section id="lideres" role="tabpanel" aria-labelledby="tab-lideres" class="panel__seccion" hidden></section>
+
+    <!-- Usuarios del panel (CC-24) -->
+    <section id="usuarios" role="tabpanel" aria-labelledby="tab-usuarios" class="panel__seccion" hidden>
+      <h1>Usuarios del panel</h1>
+      <p class="ayuda">Aquí agregas a las personas que pueden entrar al panel. Todos tienen los mismos permisos. La contraseña la crea cada persona: al agregarla, le llega un correo con un enlace para crearla. Nadie más la ve ni la conoce.</p>
+      <div class="panel__dos">
+        <form id="form-usuario" class="grupo" novalidate>
+          <h2 class="grupo__titulo" data-titulo-form>Agregar usuario</h2>
+          <div class="campos">
+            <div class="campo"><label for="usuario-nombre-campo">Nombre completo</label><input id="usuario-nombre-campo" name="nombre" type="text" autocomplete="off" placeholder="Saida Grande" required></div>
+            <div class="campo"><label for="usuario-cargo">Cargo</label><input id="usuario-cargo" name="cargo" type="text" autocomplete="off" placeholder="Coordinación social" required></div>
+            <div class="campo campo--ancho"><label for="usuario-correo">Correo</label><input id="usuario-correo" name="correo" type="email" autocomplete="off" placeholder="nombre@gmail.com" required>
+              <p class="ayuda ayuda--chica" id="usuario-correo-ayuda">A este correo le llegará el enlace para crear su contraseña. El correo no se puede cambiar después.</p></div>
+            <label class="casilla campo--ancho" id="usuario-terminos-caja"><input id="usuario-terminos" type="checkbox"> <span>La persona conoce y acepta los <a href="../terminos.html" target="_blank" rel="noopener">Términos y condiciones de uso</a>.</span></label>
+          </div>
+          <div class="formulario__botones">
+            <button type="submit" class="boton">Guardar</button>
+            <button type="button" class="boton boton--claro" data-cancelar hidden>Cancelar edición</button>
+          </div>
+        </form>
+        <div>
+          <h2 class="grupo__titulo">Usuarios registrados</h2>
+          <ul class="panel__lista panel__usuarios" id="lista-usuarios"><li class="vacio">Cargando…</li></ul>
+        </div>
+      </div>
+    </section>
   </main>
   </div>
 

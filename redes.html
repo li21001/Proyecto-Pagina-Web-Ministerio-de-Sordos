@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Nunito:wght@700;800&display=swap">
-  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="css/estilos.css?v=20261024">
 </head>
 <body data-pagina="redes">
   <a class="saltar" href="#contenido">Saltar al contenido</a>
@@ -71,18 +71,22 @@
       </div>
       <ul class="redes" id="redes-pie" aria-label="Redes sociales y correo" hidden></ul>
     </div>
+    <div class="contenedor pie__legal">
+      <a href="terminos.html">Términos y condiciones de uso</a>
+      <span>© 2026 Ministerio de Sordos, Cojutepeque</span>
+    </div>
   </footer>
 
   <!-- 1) contenido de prueba  2) datos guardados desde el panel  3) dibujar la página -->
-  <script src="js/contenido.js"></script>
-  <script type="module" src="js/datos.js"></script>
+  <script src="js/contenido.js?v=20261024"></script>
+  <script type="module" src="js/datos.js?v=20261024"></script>
   <script>
     /* Respaldo: si no se pudo cargar datos.js (por ejemplo, al abrir el archivo con doble clic
        en lugar de Live Server), la página se dibuja con el contenido de prueba. */
     window.addEventListener("load", function () {
       if (!window.SITIO_CARGANDO) {
         var s = document.createElement("script");
-        s.src = "js/pagina.js";
+        s.src = "js/pagina.js?v=20261024";
         document.body.appendChild(s);
       }
     });

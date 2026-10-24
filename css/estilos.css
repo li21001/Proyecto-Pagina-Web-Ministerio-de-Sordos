@@ -352,3 +352,13 @@ main { flex: 1 0 auto; }
 .subtitulo { margin-top: 2.5rem; font-size: 1.4rem; }
 @media (max-width: 860px) { .datos, .rasgos { grid-template-columns: 1fr; } }
 @media (max-width: 720px) { .cultura { grid-template-columns: 1fr; } }
+
+/* Pie: enlace legal */
+.pie__legal { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; justify-content: space-between; margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 0.95rem; }
+.pie__legal a { font-weight: 700; }
+/* Términos y condiciones */
+.legal { max-width: 75ch; margin-bottom: 2rem; }
+.legal h2 { font: 800 1.3rem var(--titulos); color: var(--aqua-oscuro); margin: 1.8rem 0 0.6rem; }
+.legal ul { padding-left: 1.3rem; }
+.legal li { margin-bottom: 0.5rem; }
+.legal__fecha { display: inline-block; background: var(--aqua-claro); border-radius: 999px; padding: 0.15rem 0.9rem; font-weight: 700; }
