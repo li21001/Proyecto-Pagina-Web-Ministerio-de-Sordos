@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /panel/
+Disallow: /docs/
+
+Sitemap: https://ministeriodesordoscj.github.io/sitemap.xml
